@@ -9,6 +9,7 @@ local function open_chat_with_text(text)
 
     table.insert(lines, "")
     vim.api.nvim_buf_set_lines(buffer, 0, -1, true, lines)
+
     return buffer
 end
 
@@ -25,6 +26,11 @@ local function open_chat(template)
     local chat_buffer = open_chat_template(template)
 
     vim.api.nvim_set_current_buf(chat_buffer)
+
+    if config.options.on_open ~= nil then
+        config.options.on_open(template, chat_buffer)
+    end
+
     return chat_buffer
 end
 
@@ -33,6 +39,11 @@ local function open_chat_split(template)
     vim.cmd("sp | b" .. chat_buffer)
 
     vim.api.nvim_set_current_buf(chat_buffer)
+
+    if config.options.on_open ~= nil then
+        config.options.on_open(template, chat_buffer, 'split')
+    end
+
     return chat_buffer
 end
 
@@ -41,6 +52,11 @@ local function open_chat_vsplit(template)
     vim.cmd("vsp | b" .. chat_buffer)
 
     vim.api.nvim_set_current_buf(chat_buffer)
+
+    if config.options.on_open ~= nil then
+        config.options.on_open(template, chat_buffer, 'vsplit')
+    end
+
     return chat_buffer
 end
 

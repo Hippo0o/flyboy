@@ -104,15 +104,14 @@ local function send_message()
     local currentLineContents = ""
 
     local on_delta = function(response, err)
+        local done = response == "[DONE]"
+
         if config.options.on_delta ~= nil then
             response = config.options.on_delta(buffer, currentLine, response, err) or response
         end
 
-        if response == "[DONE]" then
+        if done then
             response = "\n\n# User #\n"
-            if config.options.on_complete ~= nil then
-                response = config.options.on_complete(buffer, currentLine) or response
-            end
         end
 
         if response then
@@ -135,9 +134,13 @@ local function send_message()
                 currentLine = vim.api.nvim_buf_line_count(buffer) - 1
             end
         end
+
+        if done and config.options.on_complete ~= nil then
+            config.options.on_complete(buffer, currentLine)
+        end
     end
 
-    openai.get_chatgpt_completion(config.options, messages, on_delta, on_complete)
+    openai.get_chatgpt_completion(config.options, messages, on_delta)
 end
 
 local function start_chat(template)

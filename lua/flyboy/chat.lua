@@ -50,8 +50,8 @@ local function parseMarkdown()
     local buffer = vim.api.nvim_get_current_buf()
     local lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
     for _, line in ipairs(lines) do
-        if line:match("^#%s+(.*)$") then
-            local role = line:match("^#%s+(.*)$")
+        if line:match("^#%s+(.*)%s#$") then
+            local role = line:match("^#%s+(.*)%s#$")
             if (currentEntry) then
                 table.insert(messages, currentEntry)
             end
@@ -82,7 +82,7 @@ local function send_message()
     local buffer = vim.api.nvim_get_current_buf()
     local currentLine = vim.api.nvim_buf_line_count(buffer)
 
-    vim.api.nvim_buf_set_lines(buffer, currentLine, currentLine, false, { "", "# Assistant", "..." })
+    vim.api.nvim_buf_set_lines(buffer, currentLine, currentLine, false, { "", "# Assistant #", "..." })
 
     currentLine = vim.api.nvim_buf_line_count(buffer) - 1
     local currentLineContents = ""
@@ -93,7 +93,7 @@ local function send_message()
         end
 
         if response == "[DONE]" then
-            response = "\n\n# User\n"
+            response = "\n\n# User #\n"
             if config.options.on_complete ~= nil then
                 response = config.options.on_complete(buffer, currentLine) or response
             end

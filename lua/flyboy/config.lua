@@ -39,22 +39,22 @@ local sources = {
 local templates = {
     blank = {
         template_fn = function(_)
-            return "# User"
+            return "# User #"
         end
     },
     visual = {
         template_fn = function(sources_table)
-            return "# User\n" .. sources_table.visual()
+            return "# User #\n" .. sources_table.visual()
         end
     },
     buffer = {
         template_fn = function(sources_table)
-            return "# User\n" .. sources_table.buffer()
+            return "# User #\n" .. sources_table.buffer()
         end
     },
     visual_with_prompt = {
         template_fn = function(sources_table)
-            return "# User\n"
+            return "# User #\n"
                 .. sources_table.prompt("Prompt to add before selection context: ")
                 .. "\n"
                 .. sources_table.visual()

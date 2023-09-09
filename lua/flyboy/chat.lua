@@ -87,39 +87,39 @@ local function send_message()
     currentLine = vim.api.nvim_buf_line_count(buffer) - 1
     local currentLineContents = ""
 
-    local on_delta = function(response)
-        if response
-            and response.choices
-            and response.choices[1]
-            and response.choices[1].delta
-            and response.choices[1].delta.content then
-            local delta = response.choices[1].delta.content
-            if delta == "\n" then
-                vim.api.nvim_buf_set_lines(buffer, currentLine, currentLine, false,
-                    { currentLineContents })
-                currentLine = currentLine + 1
-                currentLineContents = ""
-            elseif delta:match("\n") then
-                for line in delta:gmatch("[^\n]+") do
-                    vim.api.nvim_buf_set_lines(buffer, currentLine, currentLine, false,
-                        { currentLineContents .. line })
-                    currentLine = currentLine + 1
+    local on_delta = function(response, err)
+        if config.options.on_delta ~= nil then
+            response = config.options.on_delta(buffer, currentLine, response, err) or response
+        end
+
+        if response == "[DONE]" then
+            response = "\n\n# User\n"
+            if config.options.on_complete ~= nil then
+                response = config.options.on_complete(buffer, currentLine) or response
+            end
+        end
+
+        if response then
+            local lines = vim.split(response, "\n", {})
+            local length = #lines
+            for i, line in ipairs(lines) do
+                currentLineContents = vim.api.nvim_buf_get_lines(buffer, -2, -1, false)[1]
+                if currentLineContents == "..." then
                     currentLineContents = ""
                 end
-            elseif delta ~= nil then
-                currentLineContents = currentLineContents .. delta
+                vim.api.nvim_buf_set_lines(buffer, -2, -1, false, { currentLineContents .. line })
+
+                local last_line_num = vim.api.nvim_buf_line_count(buffer)
+
+                if i < length then
+                    -- Add new line
+                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false, { "" })
+                end
+
+                currentLine = vim.api.nvim_buf_line_count(buffer) - 1
             end
         end
     end
-
-    local on_complete = function()
-        vim.api.nvim_buf_set_lines(buffer, currentLine, currentLine + 1, false,
-            { currentLineContents, "", "# User", "" })
-        if config.options.on_complete ~= nil then
-            config.options.on_complete()
-        end
-    end
-
 
     openai.get_chatgpt_completion(config.options, messages, on_delta, on_complete)
 end

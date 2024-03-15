@@ -32,19 +32,9 @@ local function recieve_chunk(chunk, on_stdout_chunk, on_chunk_error)
 end
 
 local curl = require('plenary.curl')
-local function get_chatgpt_completion(options, messages, on_delta, on_error_cb)
-    local had_error = false
-    local job
-
-    local function on_error(err)
-        if on_error_cb and not had_error then
-            on_error_cb(err)
-        end
-        job:shutdown()
-        had_error = true
-    end
-
-    job = curl.post(options.url,
+local function get_chatgpt_completion(options, messages, on_delta, on_error)
+    return curl.post(
+        options.url,
         {
             headers = options.headers,
             body = vim.fn.json_encode(
@@ -61,9 +51,8 @@ local function get_chatgpt_completion(options, messages, on_delta, on_error_cb)
                 end
             end),
             on_error = on_error,
-        })
-
-    return job
+        }
+    )
 end
 
 

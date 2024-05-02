@@ -60,7 +60,7 @@ local function open_chat_vsplit(template)
     return chat_buffer
 end
 
-local function parseMarkdown()
+local function parse_markdown()
     local messages = {}
     local currentEntry = nil
     local buffer = vim.api.nvim_get_current_buf()
@@ -93,7 +93,7 @@ local function parseMarkdown()
 end
 
 local function send_message()
-    local messages = parseMarkdown()
+    local messages = parse_markdown()
 
     local buffer = vim.api.nvim_get_current_buf()
     local currentLine = vim.api.nvim_buf_line_count(buffer)
@@ -169,6 +169,7 @@ end
 
 return {
     send_message = send_message,
+    parse_buffer = parse_markdown,
     open_chat = open_chat,
     open_chat_split = open_chat_split,
     open_chat_vsplit = open_chat_vsplit,
